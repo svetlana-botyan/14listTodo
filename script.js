@@ -36,7 +36,6 @@ function handleSubmit(event) {
 // сохрание перед перезагрузкой
 function handleBeforeUnload() {
   const json = JSON.stringify(data)
-  //console.log(json)
   localStorage.setItem('information', json)
 }
 
@@ -161,10 +160,10 @@ class Render {
     }
   }
 
-  render() {
+  render(array = this.data) {
     this.clearLists()
 
-    this.data.forEach((toDo) => {
+    array.forEach((toDo) => {
       const { group } = toDo
       const listElement = listElements[group]
 
@@ -200,8 +199,35 @@ class Render {
   }
 }
 
-//удаление задачи
+//checked
+class HandleChecked extends Render {
+  constructor(data, listElements, event) {
+    super(data, listElements)
+    this.event = event
+    this.checked()
+  }
 
+  checked() {    
+    const { target } = this.event
+    const { id, checked, type } = target
+
+        console.log( { id, checked, type })
+
+    if (type !== 'checkbox') return
+
+    this.data.forEach((item) => {
+      if (item.id == id) {
+        item.isChecked = checked
+        console.log(item)
+      }
+    })
+
+    super.render(this.data)
+  }
+}
+
+
+//удаление задачи
 class ButtonRemove extends Render {
   constructor(data, listElements, event) {
     super(data, listElements)
@@ -210,62 +236,27 @@ class ButtonRemove extends Render {
   }
 
   remove() {
-    console.log(this.data)
     const { role, id } = this.event.target.dataset
 
     if (role == 'remove') {
-      data = this.data.filter((item) => {
+      this.data = this.data.filter((item) => {
         if (item.id == id) {
           return false
         } else {
           return true
         }
       })
-      console.log(data)
+      super.render(this.data)
     }
   }
 }
 
-function handleClickButtonRemove(event) {
-  const { role, id } = event.target.dataset
-
-  if (role == 'remove') {
-    data = data.filter((item) => {
-      if (item.id == id) {
-        return false
-      } else {
-        return true
-      }
-    })
-
-    new Render(data, listElements)
-  }
-}
-
-function handleChange(event) {
-  const { target } = event
-  const { id, checked, type } = target
-  //console.log(target )
-
-  if (type !== 'checkbox') return
-
-  data.forEach((item) => {
-    if (item.id == id) {
-      item.isChecked = checked
-      //console.log(item)
-    }
-  })
-
-  new Render(data, listElements)
-}
 
 formElement.addEventListener('submit', handleSubmit)
 //buttonNewListElement.addEventListener('click', handleClickButtonNewList)
 
-listParentElement.addEventListener('change', handleChange)
-
 listParentElement.addEventListener('change', (event) => {
-  new ButtonRemove(data, listElements, event)
+  new HandleChecked(data, listElements, event)
 })
 
 listParentElement.addEventListener('click', (event) => {
