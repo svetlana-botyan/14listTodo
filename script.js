@@ -30,24 +30,7 @@ function handleSubmit(event) {
   data.push(toDo)
   formElement.reset()
 
-  new Render(data,listElements)
-}
-
-function handleChange(event) {
-  const { target } = event
-  const { id, checked, type } = target
-  //console.log(target )
-
-  if (type !== 'checkbox') return
-
-  data.forEach((item) => {
-    if (item.id == id) {
-      item.isChecked = checked
-      //console.log(item)
-    }
-  })
-
-  new Render(data,listElements)
+  new Render(data, listElements)
 }
 
 // сохрание перед перезагрузкой
@@ -64,33 +47,7 @@ function handleDOMReady() {
   if (informationFromStorage) {
     data = JSON.parse(informationFromStorage)
 
-    new Render(data,listElements)
-  }
-}
-
-//удаление задачи
-// class buttonRemove {
-//   constructor(event) {
-//     this.role = event.target.dataset
-//     this.role = event.target.dataset
-//   }
-
-// }
-
-function handleClickButtonRemove(event) {
-  const { role, id } = event.target.dataset
-  
-
-  if (role == 'remove') {
-    data = data.filter((item) => {
-      if (item.id == id) {
-        return false
-      } else {
-        return true
-      }
-    })
-
-    new Render(data,listElements)
+    new Render(data, listElements)
   }
 }
 
@@ -100,7 +57,7 @@ function handleClickButtonCancilEdit(event) {
   // console.log(role)
 
   if (role == 'cancel') {
-    new Render(data,listElements)
+    new Render(data, listElements)
     isEdit = false
   }
 }
@@ -155,16 +112,10 @@ function handleFormEditSubmit(event) {
 
     console.log(currentEditedToDo)
 
-    new Render(data,listElements)
+    new Render(data, listElements)
     isEdit = false
   }
 }
-
-//добавление нового списка
-// function handleClickButtonNewList(event) {
-//   event.preventDefault()
-//   let nameNewList = prompt(' Введите название нового списка')
-// }
 
 function blockEditTemplate({ textContent }) {
   const templateEdit = ` 
@@ -193,6 +144,8 @@ function blockEditTemplate({ textContent }) {
 
   return templateEdit
 }
+
+//Классы
 
 class Render {
   constructor(data, listElements) {
@@ -226,7 +179,7 @@ class Render {
       index == 1
         ? `<svg class="pe-none hourglassSplit" width="16" height="16"> <use style="color:red" href="#hourglassSplit" /></svg>`
         : `<svg class="pe-none hourglass" width="16" height="16"> <use style="color:green" href="#hourglass" /></svg>`
-  
+
     const template = `
         <div class="new-task col-12 align-items-start d-flex ${checkedAttr} " >    
           <div class="form-check" >
@@ -242,22 +195,87 @@ class Render {
           <button  class="btn  btn-outline-danger" data-role="remove" data-id="${id}" ><svg class="pe-none " width="16" height="16">
           <use href="#trash" /></svg></button>
         </div>`
-  
+
     return template
   }
+}
 
+//удаление задачи
+
+class ButtonRemove extends Render {
+  constructor(data, listElements, event) {
+    super(data, listElements)
+    this.event = event
+    this.remove()
+  }
+
+  remove() {
+    console.log(this.data)
+    const { role, id } = this.event.target.dataset
+
+    if (role == 'remove') {
+      data = this.data.filter((item) => {
+        if (item.id == id) {
+          return false
+        } else {
+          return true
+        }
+      })
+      console.log(data)
+    }
+  }
+}
+
+function handleClickButtonRemove(event) {
+  const { role, id } = event.target.dataset
+
+  if (role == 'remove') {
+    data = data.filter((item) => {
+      if (item.id == id) {
+        return false
+      } else {
+        return true
+      }
+    })
+
+    new Render(data, listElements)
+  }
+}
+
+function handleChange(event) {
+  const { target } = event
+  const { id, checked, type } = target
+  //console.log(target )
+
+  if (type !== 'checkbox') return
+
+  data.forEach((item) => {
+    if (item.id == id) {
+      item.isChecked = checked
+      //console.log(item)
+    }
+  })
+
+  new Render(data, listElements)
 }
 
 formElement.addEventListener('submit', handleSubmit)
 //buttonNewListElement.addEventListener('click', handleClickButtonNewList)
 
 listParentElement.addEventListener('change', handleChange)
-listParentElement.addEventListener('click', handleClickButtonRemove)
+
+listParentElement.addEventListener('change', (event) => {
+  new ButtonRemove(data, listElements, event)
+})
+
+listParentElement.addEventListener('click', (event) => {
+  new ButtonRemove(data, listElements, event)
+})
+//listParentElement.addEventListener('click', handleClickButtonRemove)
+
 listParentElement.addEventListener('click', handleClickButtonEdit)
 listParentElement.addEventListener('click', handleClickButtonCancilEdit)
 listParentElement.addEventListener('submit', handleFormEditSubmit)
 
 window.addEventListener('beforeunload', handleBeforeUnload) // сохранение перед перезагр.
 window.addEventListener('DOMContentLoaded', handleDOMReady) // восстановл. после перезагр.
-
-
