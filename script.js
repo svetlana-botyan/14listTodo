@@ -1,144 +1,153 @@
-let data = []
-let isEdit = false
-//let currentEditedToDo = {}
-const formElement = document.querySelector('#form')
-const listParentElement = document.querySelector('#listParent')
-const selectPriorityElement = formElement.querySelector('#priority')
+let data = [];
+let isEdit = false;
+let currentEditedToDo = {};
+const formElement = document.querySelector("#form");
+const listParentElement = document.querySelector("#listParent");
+const selectPriorityElement = formElement.querySelector("#priority");
 //const buttonNewListElement = formElement.querySelector('#addCategory')
 
 const listElements = {
-  commonGroup: document.querySelector('#commonGroup'),
-  workGroup: document.querySelector('#workGroup'),
-  personalGroup: document.querySelector('#personalGroup'),
-  educationGroup: document.querySelector('#educationGroup'),
-}
+  commonGroup: document.querySelector("#commonGroup"),
+  workGroup: document.querySelector("#workGroup"),
+  personalGroup: document.querySelector("#personalGroup"),
+  educationGroup: document.querySelector("#educationGroup"),
+};
 
 function handleSubmit(event) {
-  event.preventDefault()
+  event.preventDefault();
 
   const toDo = {
     id: new Date().getTime(),
     isChecked: false,
     index: selectPriorityElement.options.selectedIndex,
+  };
+
+  const fromData = new FormData(formElement);
+  for (let [name, value] of fromData.entries()) {
+    toDo[name] = value;
   }
 
+  data.push(toDo);
+  formElement.reset();
 
-  const fromData = new FormData(formElement)
-    for (let [name, value] of fromData.entries()) {
-    toDo[name] = value
-   
-  }
-
-  data.push(toDo)
-  formElement.reset()
-
-  render()
+  render();
 }
 
 function handleChange(event) {
-  const { target } = event
-  const { id, checked } = target
+  const { target } = event;
+  const { id, checked, type } = target;
+  //console.log(target )
 
-  if (type !== 'checkbox') return
+  if (type !== "checkbox") return;
 
   data.forEach((item) => {
     if (item.id == id) {
-      item.isChecked = checked
+      item.isChecked = checked;
       //console.log(item)
     }
-  })
+  });
 
-  render()
+  render();
 }
 
 // сохрание перед перезагрузкой
 function handleBeforeUnload() {
-  const json = JSON.stringify(data)
+  const json = JSON.stringify(data);
   //console.log(json)
-  localStorage.setItem('information', json)
+  localStorage.setItem("information", json);
 }
 
 // забираем данные из localStorage
 function handleDOMReady() {
-  const informationFromStorage = localStorage.getItem('information')
+  const informationFromStorage = localStorage.getItem("information");
 
   if (informationFromStorage) {
-    data = JSON.parse(informationFromStorage)
+    data = JSON.parse(informationFromStorage);
 
-    render()
+    render();
   }
 }
 
 //удаление задачи
 function handleClickButtonRemove(event) {
-  const { role, id } = event.target.dataset
+  const { role, id } = event.target.dataset;
 
-  if (role == 'remove') {
+  if (role == "remove") {
     data = data.filter((item) => {
       if (item.id == id) {
-        return false
+        return false;
       } else {
-        return true
+        return true;
       }
-    })
+    });
 
-    render()
+    render();
+  }
+}
+
+// отмена редактирования
+function handleClickButtonCancilEdit(event) {
+  const { role } = event.target.dataset;
+  // console.log(role)
+
+  if (role == "cancel") {
+    render();
+    isEdit = false;
   }
 }
 
 // редактирование
 
 function handleClickButtonEdit(event) {
-  const { target } = event
-  const { role, id } = target.dataset
+  const { target } = event;
+  const { role, id } = target.dataset;
 
-  if (role == 'edit') {
+  if (role == "edit") {
     // запрет на одновременное редактирование
     if (isEdit == true) {
-      return
+      return;
     }
 
     data.forEach((item) => {
       if (item.id == id) {
-        const { parentElement } = target
-        currentEditedToDot = item //значения исходные задачи
-        console.log(item)
-        const blockEditElement = blockEditTemplate(item) // item объект каждой toDo
+        const { parentElement } = target;
+        currentEditedToDo = item; //значения исходные задачи
+        console.log(item);
+        const blockEditElement = blockEditTemplate(item); // item объект каждой toDo
 
-        parentElement.outerHTML = blockEditElement
-        isEdit = true
+        parentElement.outerHTML = blockEditElement;
+        isEdit = true;
       }
-    })
-    isEdit = false
-  }
-}
-
-// отмена редактирования
-function handleClickButtonCancilEdit(event) {
-  const { role } = event.target.dataset
-  // console.log(role)
-
-  if (role == 'cancel') {
-    render()
-    isEdit = false
+    });
   }
 }
 
 function handleFormEditSubmit(event) {
-  event.preventDefault()
+  event.preventDefault();
 
-  const { target } = event
-  console.log(target)
-  const { role, id } = target.dataset
+  const { target } = event;
+  console.log(target);
+  const { role, id } = target.dataset;
 
-  if (role == 'editForm') {
-    // const textContent = target.querySelector('[name="textContent"]').value
-    // // console.log(currentEditedToDo)
-    // // currentEditedToDo.textContent = textContent
-    // // console.log(currentEditedToDo)
+  if (role == "editForm") {
+    const textContent = target.querySelector('[name="textContent"]').value;
+    const group = target.querySelector('[name="group"]').value;
+    const selectPriorityElement = target.querySelector(
+      '[name="priorityContent"]'
+    );
 
-    render()
-    isEdit = false
+    console.log(selectPriorityElement);
+    const index = selectPriorityElement.options.selectedIndex;
+
+    console.log(index);
+    currentEditedToDo.textContent = textContent;
+    currentEditedToDo.group = group;
+    currentEditedToDo.index = index;
+
+    console.log(currentEditedToDo);
+
+    render();
+    isEdit = false;
   }
 }
 
@@ -149,14 +158,14 @@ function handleFormEditSubmit(event) {
 // }
 
 function createToDoTemplate({ id, textContent, isChecked, index }) {
-  const checkedAttr = isChecked ? 'checked' : '' // если уже чекнули то он останется
+  const checkedAttr = isChecked ? "checked" : ""; // если уже чекнули то он останется
   const icon =
     index == 1
       ? `<svg class="pe-none hourglassSplit" width="16" height="16"> <use style="color:red" href="#hourglassSplit" /></svg>`
-      : `<svg class="pe-none hourglass" width="16" height="16"> <use style="color:green" href="#hourglass" /></svg>`
+      : `<svg class="pe-none hourglass" width="16" height="16"> <use style="color:green" href="#hourglass" /></svg>`;
 
   const template = `
-      <div class="new-task col-12 align-items-start d-flex ${checkedAttr}" >    
+      <div class="new-task col-12 align-items-start d-flex ${checkedAttr} " >    
         <div class="form-check" >
           <input class="form-check-input" ${checkedAttr} type="checkbox" value="" id="${id}">
           ${icon}
@@ -169,9 +178,9 @@ function createToDoTemplate({ id, textContent, isChecked, index }) {
 
         <button  class="btn  btn-outline-danger" data-role="remove" data-id="${id}" ><svg class="pe-none " width="16" height="16">
         <use href="#trash" /></svg></button>
-      </div>`
+      </div>`;
 
-  return template
+  return template;
 }
 
 function blockEditTemplate({ textContent }) {
@@ -197,40 +206,40 @@ function blockEditTemplate({ textContent }) {
         <use href="#check" />
       </svg></button>
 </form>
-`
+`;
 
-  return templateEdit
+  return templateEdit;
 }
 
 function render() {
-  clearLists()
+  clearLists();
   data.forEach((toDo) => {
-    const { group } = toDo
-    const listElement = listElements[group]
+    const { group } = toDo;
+    const listElement = listElements[group];
 
-    const result = createToDoTemplate(toDo)
-    listElement.innerHTML += result
-  })
+    const result = createToDoTemplate(toDo);
+    listElement.innerHTML += result;
+  });
 }
 
 // ф-ция очищает в свойстве group innerHTML у всех div-ов объектa listElements
 function clearLists() {
   for (let group in listElements) {
-    listElements[group].innerHTML = ''
+    listElements[group].innerHTML = "";
   }
   // console.log(listElements)
 }
 
-formElement.addEventListener('submit', handleSubmit)
+formElement.addEventListener("submit", handleSubmit);
 //buttonNewListElement.addEventListener('click', handleClickButtonNewList)
 
-listParentElement.addEventListener('change', handleChange)
-listParentElement.addEventListener('click', handleClickButtonRemove)
-listParentElement.addEventListener('click', handleClickButtonEdit)
-listParentElement.addEventListener('click', handleClickButtonCancilEdit)
-listParentElement.addEventListener('submit', handleFormEditSubmit)
+listParentElement.addEventListener("change", handleChange);
+listParentElement.addEventListener("click", handleClickButtonRemove);
+listParentElement.addEventListener("click", handleClickButtonEdit);
+listParentElement.addEventListener("click", handleClickButtonCancilEdit);
+listParentElement.addEventListener("submit", handleFormEditSubmit);
 
-window.addEventListener('beforeunload', handleBeforeUnload) // сохранение перед перезагр.
-window.addEventListener('DOMContentLoaded', handleDOMReady) // восстановл. после перезагр.
+window.addEventListener("beforeunload", handleBeforeUnload); // сохранение перед перезагр.
+window.addEventListener("DOMContentLoaded", handleDOMReady); // восстановл. после перезагр.
 
 // console.log(formData)

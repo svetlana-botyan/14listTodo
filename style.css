@@ -66,6 +66,10 @@ h1 {
 .new-task {
     border-bottom: 1px solid rgba(13, 109, 253, 0.753);
     padding: 2px 0;
+    display: flex;
+}
+.new-task.checked {
+    order: 1;
 }
 
 .new-task>.form-check {
@@ -78,6 +82,7 @@ h1 {
 .form-check-input{
     margin:  0;
 }
+
 
 .hourglassSplit, .hourglass{
     margin: 0 5px;
@@ -93,6 +98,5 @@ h1 {
     padding: 0;
 }
 
-.new-task:not(.checked) {
-    order: -1;
-}
+
+
